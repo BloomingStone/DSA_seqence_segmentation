@@ -1,0 +1,13 @@
+/.idea/
+/.vscode/
+
+*.log
+*/log/
+**/tensorboard/
+
+**/__pycache__/
+*.pyc
+
+
+*.pth
+*.ckpt

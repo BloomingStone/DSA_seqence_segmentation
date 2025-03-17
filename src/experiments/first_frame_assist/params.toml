@@ -1,0 +1,31 @@
+[device]
+CUDA_VISIBLE_DEVICES = "1"
+
+[dataset]
+name = "WFM"
+image_dir = "/media/data3/sj/Data/dsa/2023/L_ori_npy_first_last_per10"
+label_dir = "/media/data3/sj/Data/dsa/2023/L_mask_npy_first_last_per10"
+data_info_csv_path = "/media/data3/sj/Data/dsa/2023_L.csv"
+n_splits = 5
+fold = 0
+split_random_seed = 42
+
+[model]
+name = "ResEncUNet"
+other_info = "first_frame_assests"
+basemodel_checkpoint_path = "/media/data3/sj/Code/DSA/src/experiments/first_frame_assist/basemodel_checkpoint/WFM_ResEncUNet_1_channel_1_frame_LCA_baseline_best.ckpt"
+
+[train]
+batch_size = 4
+shuffle = true
+n_epochs = 100
+saving_interval = 20
+
+[valid]
+batch_size = 4
+shuffle = false
+
+[test]
+batch_size = 1
+shuffle = false
+max_tensorboard_image = 0
