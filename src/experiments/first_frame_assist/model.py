@@ -90,7 +90,9 @@ def get_model_inited_by_base_model_checkpoints(base_model_checkpoint_path: Path,
 
 
 if __name__ == '__main__':
-    from . import params
+    import tomllib
+    with open(Path(__file__).parent / "params.toml", "rb") as f:
+        params = tomllib.load(f)
     model = get_model_inited_by_base_model_checkpoints(
         base_model_checkpoint_path=Path(params["model"]['basemodel_checkpoint_path']),
         num_classes=1
