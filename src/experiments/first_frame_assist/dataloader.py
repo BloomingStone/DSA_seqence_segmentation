@@ -10,13 +10,12 @@ from monai.transforms import (
     SpatialPadd, OneOf, Identity
 )
 
-from src.core.utils.task_type import TaskType
-from src.core.base_augment_transforms import (
+from ...core.utils.task_type import TaskType
+from ...core.base_augment_transforms import (
     get_affine_transform, get_degradation_transform,
     get_intensity_transform, get_shape_transform
 )
-from . import params, ImageType
-
+from .image_type import ImageType
 
 def get_basic_transform() -> Compose:
     return Compose([
@@ -35,7 +34,7 @@ def get_basic_transform() -> Compose:
         AsDiscreted(keys=[ImageType.Label], threshold=0.5),
     ])
 
-def get_data_augment_transform() -> Compose:
+def get_augment_transform() -> Compose:
     return OneOf(
         [
             Compose([
@@ -49,55 +48,62 @@ def get_data_augment_transform() -> Compose:
         weights=[0.8, 0.2],
     )
 
-def get_transforms() -> dict[TaskType, Compose]:
-    return {
-        TaskType.Train: Compose([
-            get_basic_transform(),
-            get_data_augment_transform(),
-        ]),
-        TaskType.Valid: get_basic_transform(),
-        TaskType.Test: get_basic_transform(),
-    }
+class DataLoaderManager:
+    def __init__(
+            self,
+            image_dir: Path,
+            label_dir: Path,
+            data_info_csv_path: Path,
+            n_splits: int,
+            random_seed: int,
+        ):
+        self.image_dir = image_dir
+        self.label_dir = label_dir
+        self.n_splits = n_splits
+        self.random_seed = random_seed
+        self.csv_df = pd.read_csv(data_info_csv_path)
 
-def get_data_paths(fold: int) -> dict[TaskType, dict[ImageType, list[Path]]]:
-    config = params["dataset"]
-    image_dir = Path(config["image_dir"])
-    label_dir = Path(config["label_dir"])
+        skf = StratifiedKFold(
+            n_splits=n_splits, 
+            shuffle=True, 
+            random_state=random_seed
+        )
+        self.k_folds = list(skf.split(self.csv_df, self.csv_df["has_NG"]))
 
-    csv_df = pd.read_csv(config["data_info_csv_path"])
-    skf = StratifiedKFold(
-        n_splits=config["n_splits"], 
-        shuffle=True, 
-        random_state=config["split_random_seed"]
-    )
+        self.basic_transform = get_basic_transform()
+        self.augment_transform = get_augment_transform()
 
-    train_index, valid_index = list(skf.split(csv_df, csv_df["has_NG"]))[fold]
-    train_name_list = csv_df.iloc[train_index]["name"].tolist()
-    valid_name_list = csv_df.iloc[valid_index]["name"].tolist()
+    def get_transform(self, taskType: TaskType) -> Compose:
+        if taskType == TaskType.Train:
+            return Compose([
+                self.basic_transform,
+                self.augment_transform,
+            ])
+        else:
+            return self.basic_transform
 
-    return {
-        TaskType.Train: {
-            ImageType.Image: [image_dir / f'{name}.npy' for name in train_name_list],
-            ImageType.Label: [label_dir / f'{name}.npy' for name in train_name_list],
-        },
-        TaskType.Valid: {
-            ImageType.Image: [image_dir / f'{name}.npy' for name in valid_name_list],
-            ImageType.Label: [label_dir / f'{name}.npy' for name in valid_name_list],
-        },
-        TaskType.Test: {
-            ImageType.Image: [image_dir / f'{name}.npy' for name in valid_name_list],
-            ImageType.Label: [label_dir / f'{name}.npy' for name in valid_name_list],
-        },
-    }
+    def get_data_paths(self, task_type, fold: int) -> dict[ImageType, list[Path]]:
+        train_index, valid_index = self.k_folds[fold]
+        if task_type == TaskType.Train:
+            name_list = self.csv_df.iloc[train_index]["name"].tolist()
+        else:
+            name_list = self.csv_df.iloc[valid_index]["name"].tolist()
+        
+        return {
+            ImageType.Image: [self.image_dir / f'{name}.npy' for name in name_list],
+            ImageType.Label: [self.label_dir / f'{name}.npy' for name in name_list],
+        }
 
-def get_dataloaders(fold: int) -> dict[TaskType, ThreadDataLoader]:
-    data_paths = get_data_paths(fold)
-    transforms = get_transforms()
-
-    res: dict[TaskType, ThreadDataLoader] = {}
-    for task_type, d in data_paths.items():
+    def get_dataloader(
+            self,
+            task_type: TaskType, 
+            fold: int,
+            batch_size: int,
+            shuffle: bool,
+    ) -> ThreadDataLoader:
+        data_paths = self.get_data_paths(task_type, fold)
         data: list[dict[ImageType, MetaTensor]] = []
-        for image_path, label_path in zip(d[ImageType.Image], d[ImageType.Label]):
+        for image_path, label_path in zip(data_paths[ImageType.Image], data_paths[ImageType.Label]):
             image = np.load(image_path)
             label = np.load(label_path)
             first_frame = image[0]
@@ -109,33 +115,13 @@ def get_dataloaders(fold: int) -> dict[TaskType, ThreadDataLoader]:
                     ImageType.FirstImage: MetaTensor(first_frame, meta={"image_name": image_path.stem, "slice": 0}),
                 })
                 
-        res[task_type] = ThreadDataLoader(
+        return ThreadDataLoader(
             dataset=  CacheDataset(
                 data=data,
-                transform=transforms[task_type],
+                transform=self.get_transform(task_type),
             ),
-            batch_size=params[task_type]["batch_size"],
-            shuffle=params[task_type]["shuffle"],
+            batch_size=batch_size,
+            shuffle=shuffle,
             num_workers=8,
             pin_memory=True,
         )
-    
-    return  res
-
-
-if __name__ == "__main__":
-    def _test_dataloader():
-        from matplotlib import pyplot as plt
-        dataloaders = get_dataloaders(0)
-        for dataloader in dataloaders.values():
-            batch = next(iter(dataloader))
-            for key, value in batch.items():
-                print(key, value.shape)
-                if value.ndim == 4:
-                    data = value[0, 0]
-                    image_path = data.meta["image_name"]
-                    slice = data.meta["slice"]
-                    plt.imshow(data.numpy())
-                    plt.show()
-                    plt.title(f"{key} - {image_path}- - {slice}")
-    _test_dataloader()

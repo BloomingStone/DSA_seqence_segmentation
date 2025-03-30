@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from functools import wraps
 
+# todo logger 本身就已经用单例实现了，改用名称或者__module__调用
 _logger: Optional[logging.Logger] = None
 
 def valid_init(func: Callable) -> Callable:
@@ -47,7 +48,7 @@ def init_logger(root_dir: Path) -> None:
     _logger.addHandler(handler_console)
 
 @valid_init
-def log_single_epoch_info(
+def log_single_batch_info(
         epoch: int,
         total_epoch: int,
         batch: int,

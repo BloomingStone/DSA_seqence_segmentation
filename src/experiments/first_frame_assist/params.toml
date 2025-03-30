@@ -28,4 +28,4 @@ shuffle = false
 [test]
 batch_size = 1
 shuffle = false
-max_tensorboard_image = 0
+max_saved_image = 0
