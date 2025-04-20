@@ -155,7 +155,7 @@ def test():
     )
     torch_output = torch_output.cpu().detach().numpy()
 
-    output_dir = Path('DSA/experiments/first_frame_assist/export_onnx')
+    output_dir = Path(__file__).parent / 'exported_onnx'
     features_name, features_shape = export_onnxs(model, output_dir)
 
     print(f"features_name: {features_name}, \nfeatures_shape: {features_shape}")
