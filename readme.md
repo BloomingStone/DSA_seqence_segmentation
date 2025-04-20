@@ -2,7 +2,9 @@
 
 `/src/core` 中是各个实验共用代码.`/src/experiment` 中是各个实验代码(目前所给的是效果最好的用第一帧做后续帧提示的分割), 且由于沈工说右冠之前的版本够用了,所以这一版训练和测试都只在左冠上进行.
 
-其中 `train.py` 是训练模型的代码, `params.toml`是一些训练参数, `only_test.py` 只运行valid_epoch代码, `predict.py` 可以直接预测整个序列, `/checpoints/` 下是训练好的模型权重
+其中 `train.py` 是训练模型的代码, `params.toml`是一些训练参数, `only_test.py` 只运行valid_epoch代码, `predict.py` 可以直接预测整个序列, `/checpoints/` 下是训练好的模型权重.
+
+params.toml 中的`basemodel_checkpoint_path`是之前训练好的单帧分割模型,其中的`encoder` 和`decoder`模块和现在的模型基本保持一致.
 
 `/export_onnx/`下是导出的onnx模型, 一共有两个onnx文件, 分别是 `fisrt_frame_encoder.onnx` 和 `mix_and_decoder.onnx`, 前者用来提取第一帧特征, 后者用来提取后续帧特征并于第一帧特征混合后解码得到分割结果. 以python代码所写的运行示例见`export_onnx.py` 的 `test_onnx` 函数.
 
