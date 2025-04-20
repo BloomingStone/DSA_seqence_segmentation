@@ -8,7 +8,6 @@ from monai.losses import DiceCELoss
 from monai.metrics import CumulativeAverage
 from monai.data import DataLoader, ThreadDataLoader
 
-# todo 不要用这种方法导入params, 使用显式load
 from .dataloader import DataLoaderManager
 from .model import get_model_inited_by_base_model_checkpoints
 from .single_epochs import train_single_epoch, validate_single_epoch, test_single_epoch
