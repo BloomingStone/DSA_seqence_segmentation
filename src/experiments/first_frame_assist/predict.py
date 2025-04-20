@@ -28,7 +28,7 @@ def get_sequence_transform() -> T.Compose:
 
 def get_sequence_predict_dataloader(nii_image_dir: Path):
     print("loading data")
-    nii_image_paths = list(nii_image_dir.glob('*.nii.gz'))
+    nii_image_paths = list(sorted(nii_image_dir.glob('*.nii.gz')))
     data = [{
         Sequence: nii_image_path,
     } for nii_image_path in nii_image_paths]
@@ -48,7 +48,7 @@ def get_sequence_predict_dataloader(nii_image_dir: Path):
 def save_mp4(ori_sequence: np.ndarray, mask_sequence: np.ndarray, output_path: Path, fps=10):
     frames = []
     for i in tqdm(range(ori_sequence.shape[0]), desc="output video"):
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(4,4), dpi=128)
         ax.imshow(ori_sequence[i], cmap='gray')
         ax.imshow(mask_sequence[i], alpha=0.4, cmap='Reds')
         plt.axis('off')
