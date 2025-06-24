@@ -4,6 +4,7 @@ from time import time
 import tomllib
 
 import torch
+from torch import nn
 from monai.losses import DiceCELoss     # type: ignore
 from monai.metrics import CumulativeAverage # type: ignore
 from monai.data import DataLoader # type: ignore
@@ -17,10 +18,18 @@ from ...core.utils.log import init_logger
 from ...core.utils.tensorboard import init_writer
 
 
-def main():
-    task_dir = Path(__file__).parent
-    with open(task_dir / "params.toml", "rb") as f:
-        params = tomllib.load(f)
+def train(
+    task_dir: Path = Path(__file__).parent,
+    model: nn.Module = ResEncUNet(output_channels=1),
+    params: dict | None = None,
+):
+    init_logger(task_dir)
+    init_writer(task_dir)
+    # TODO 使用 OmegaConf 替代简单的params
+    if params is None:
+        with open(task_dir / "params.toml", "rb") as f:
+            params = tomllib.load(f)
+    assert params is not None
 
     checkpoint_dir = task_dir / 'checkpoints'
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
@@ -29,7 +38,7 @@ def main():
     torch.manual_seed(0)
     torch.backends.cudnn.benchmark = True
 
-    model = ResEncUNet(output_channels=1).to('cuda')
+    model = model.to('cuda')
     loss_function = DiceCELoss(include_background=False, sigmoid=True)
 
     dataloader_manager = DataLoaderManager(
@@ -132,7 +141,4 @@ def main():
     )
 
 if __name__ == '__main__':
-    _task_dir = Path(__file__).parent
-    init_logger(_task_dir)
-    init_writer(_task_dir)
-    main()
+    train()

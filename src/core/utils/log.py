@@ -5,7 +5,8 @@ from datetime import datetime
 from pathlib import Path
 from functools import wraps
 
-# todo logger 本身就已经用单例实现了，改用名称或者__module__调用
+# TODO logger 本身就已经用单例实现了，改用名称或者__module__调用
+# TODO 无论如何都需要进行初始化，因此还是需要一个统一人口，否则容易忘写
 _logger: Optional[logging.Logger] = None
 
 def init_logger(root_dir: Path) -> None:

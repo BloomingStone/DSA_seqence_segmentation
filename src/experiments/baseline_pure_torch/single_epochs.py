@@ -155,16 +155,14 @@ def test_single_epoch(
             time_start = time()
 
             assert isinstance(logit_map, torch.Tensor)
-            loss = loss_function(logit_map, y)
+            loss: torch.Tensor = loss_function(logit_map, y)
             prediction = as_discrete(logit_map)
             assert isinstance(prediction, torch.Tensor)
             dice = dice_metric(prediction, y)
+            assert isinstance(dice, torch.Tensor)
             cldice = cal_clDice_temp(prediction, y)
             hd95 = cal_hausdorff_temp(prediction, y)
             continuity = cal_continuity(prediction, y)
-            assert isinstance(cldice, torch.Tensor)
-            assert isinstance(dice, torch.Tensor)
-            assert isinstance(hd95, torch.Tensor)
 
             loss_avg.append(loss)
             cldice_avg.append(cldice)
@@ -177,8 +175,8 @@ def test_single_epoch(
                 "iter": f"{batch_id+1}/{len(data_loader)}",
                 "loss": loss.item(),
                 "dice": dice.mean().item(),
-                "cldice": cldice.item(),
-                "hd95": hd95.item(),
+                "cldice": cldice,
+                "hd95": hd95,
                 "continuity": continuity,
                 "time": t
             }

@@ -86,6 +86,8 @@ class DataLoaderManager:
             batch_size: int,
             shuffle: bool,
     ) -> DataLoader:
+        if task_type == TaskType.Test:
+            task_type = TaskType.Valid
         paths = [
             {
                 ImageType.Image: image_path,

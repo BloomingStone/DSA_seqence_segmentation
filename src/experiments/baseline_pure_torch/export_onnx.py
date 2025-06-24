@@ -18,10 +18,15 @@ from ...core.base_models.ResEncUNet_pure_torch import ResEncUNet
 from .dataloader import DataLoaderManager
 
 
-def export_onnx():
-    task_dir = Path(__file__).parent
-    with open(task_dir / "params.toml", "rb") as f:
-        params = tomllib.load(f)
+def export_onnx(
+    task_dir: Path = Path(__file__).parent,
+    model: ResEncUNet = ResEncUNet(output_channels=1),
+    params: dict | None = None
+):
+    if params is None:
+        with open(task_dir / "params.toml", "rb") as f:
+            params = tomllib.load(f)
+    assert params is not None
 
     checkpoint_dir = task_dir / 'checkpoints'
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
@@ -30,9 +35,9 @@ def export_onnx():
     torch.manual_seed(0)
     torch.backends.cudnn.benchmark = True
 
-    model = ResEncUNet(output_channels=1).to('cuda')
+    model = model.to('cuda')
 
-    checkpoint_path = task_dir / "checkpoints/best.pth"
+    checkpoint_path = task_dir / "checkpoints" /" best.pth"
     model.load_state_dict(torch.load(checkpoint_path, map_location='cuda', weights_only=True))
 
     dataloader_manager = DataLoaderManager(
