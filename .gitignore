@@ -1,13 +1,12 @@
 /.idea/
-/.vscode/
 
 *.log
-*/log/
+**/log/
 **/tensorboard/
+**/checkpoints/
 
 **/__pycache__/
 *.pyc
-
 
 *.pth
 *.ckpt

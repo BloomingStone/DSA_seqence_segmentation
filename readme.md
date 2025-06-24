@@ -18,11 +18,16 @@
 │   │       └── tensorboard.py # TensorBoard集成
 │   └── experiments/         # 实验模块
 │       ├── baseline_pure_torch/  # 纯PyTorch基线实验
+│       │   ├── dataloader.py     # 数据加载器
+│       │   ├── single_epochs.py  # 单epoch训练函数
+|       │   ├── image_type.py     # 实验涉及到的图像类型（主要用于monai中）
 │       │   ├── train.py     # 训练脚本
+│       │   ├── train_sub.py # 训练子实验，此处是简化版UNet
 │       │   ├── export_onnx.py # ONNX导出
-│       │   ├── predict.py   # 预测脚本
+|       │   ├── export_onnx_sub.py  # 子实验结果导出onnx
+│       │   ├── only_test.py   # 测试脚本
 │       │   └── params.toml  # 参数配置
-|       |   └── simplified_unet_xxx/   # 简化版UNet实验(有多个)
+|       |   └── sub_experiments/   # 简化版UNet子实验(有多个)
 │       └── first_frame_assist/   # 第一帧辅助实验
 │           ├── model.py     # 模型定义
 │           ├── train.py     # 训练脚本
@@ -33,7 +38,7 @@
 
 ## 快速开始
 
-使用VSCode调试配置（`.vscode/launch.json`）可快速运行实验模块，实验细节设置可以在`params.toml`中修改。
+使用VSCode调试配置（`.vscode/launch.json`）可快速运行实验模块，实验细节设置可以在各实验文件夹下`params.toml`中修改。
 
 1. **第一帧辅助实验预测**  
    `first_frame_assist.predict` - 运行预测任务
@@ -45,7 +50,7 @@
    `baseline_pure_torch.train` - 训练基线模型
 
 4. **简化UNet训练**  
-   `simplified_unet.train` - 训练简化版UNet模型
+   `simplified_unet——train` - 训练简化版UNet模型
 
 ## 一般训练
 

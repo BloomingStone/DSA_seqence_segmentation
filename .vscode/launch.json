@@ -1,0 +1,44 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "first_frame_assist.predict",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "src.experiments.first_frame_assist.predict"
+        },
+        {
+            "name": "first_frame_assist.export_onnx",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "src.experiments.first_frame_assist.export_onnx"
+        },
+        {
+            "name": "baseline_pure_torch.train",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "src.experiments.baseline_pure_torch.train"
+        },
+        {
+            "name": "simplified unet train",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "src.experiments.baseline_pure_torch.simplify_resunet.train_sub",
+            "args": [
+                "simplify_resunet"
+            ]
+        },
+        {
+            "name": "simplified unet onnx export",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "src.experiments.baseline_pure_torch.simplify_resunet.export_onnx_sub",
+            "args": [
+                "simplify_resunet"
+            ]
+        }
+    ]
+}
