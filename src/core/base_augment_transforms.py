@@ -23,8 +23,8 @@ def get_shape_transform(image_keys: list[str], binary_image_keys: list[str]) -> 
                 align_corners=align_corners,
                 prob=0.15,
             ),
-            RandFlipd(keys, spatial_axis=[0], prob=0.5),
-            RandFlipd(keys, spatial_axis=[1], prob=0.5),
+            RandFlipd(keys, spatial_axis=[-1], prob=0.5),
+            RandFlipd(keys, spatial_axis=[-2], prob=0.5),
         ]
     )
 

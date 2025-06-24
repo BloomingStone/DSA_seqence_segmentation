@@ -8,15 +8,6 @@ from functools import wraps
 # todo logger 本身就已经用单例实现了，改用名称或者__module__调用
 _logger: Optional[logging.Logger] = None
 
-def valid_init(func: Callable) -> Callable:
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        global _logger
-        if _logger is None:
-            raise RuntimeError("Logger not initialized. Call init_logger first.")
-        return func(*args, **kwargs)
-    return wrapper
-
 def init_logger(root_dir: Path) -> None:
     global _logger
     if _logger is not None:
@@ -47,7 +38,7 @@ def init_logger(root_dir: Path) -> None:
     _logger.addHandler(handler_file)
     _logger.addHandler(handler_console)
 
-@valid_init
+
 def log_single_batch_info(
         epoch: int,
         total_epoch: int,
@@ -58,6 +49,8 @@ def log_single_batch_info(
         time_cost: float,
         other_info:Optional[str] = None
 ) -> None:
+    global _logger
+    assert _logger is not None
     _logger.info(
         f"Epoch [{epoch+1:<4d}/{total_epoch:<4d}]"
         f"\tIter [{batch + 1:<4d}/{total_batch:<4d}]"
@@ -67,16 +60,18 @@ def log_single_batch_info(
         + (other_info if other_info is not None else "")
     )
 
-@valid_init
+
 def log_valid_end_info(
         epoch: int,
         loss: float,
         dice: float
 ):
     # Epoch Validation Done
+    global _logger
+    assert _logger is not None
     _logger.info(F"Validation end at Epoch {epoch + 1} with {loss=} & {dice=}!")
 
-@valid_init
+
 def log_expected_time(
         time_per_train: float,
         time_per_valid: float,
@@ -84,6 +79,8 @@ def log_expected_time(
         epoch_total: int,
         valid_step: int
 ) -> None:
+    global _logger
+    assert _logger is not None
     epoch_left_train = epoch_total - epoch_now - 1
     epoch_left_valid = (epoch_total - epoch_now) // valid_step + 1
     time_left = time_per_train * epoch_left_train + time_per_valid * epoch_left_valid
@@ -91,18 +88,22 @@ def log_expected_time(
     end_timepoint = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time_expected))
     _logger.info("Expected to end at: {}".format(end_timepoint))
 
-@valid_init
-def log_expected_time(
+
+def log_expected_time_valid(
         time_per_train_valid: float,
         epoch_now: int,
         epoch_total: int
 ) -> None:
+    global _logger
+    assert _logger is not None
     epoch_left_train = epoch_total - epoch_now - 1
     time_left = time_per_train_valid * epoch_left_train
     time_expected = time.time() + time_left
     end_timepoint = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time_expected))
     _logger.info("Expected to end at: {}".format(end_timepoint))
 
-@valid_init
+
 def log_info(info: str):
+    global _logger
+    assert _logger is not None
     _logger.info(info)

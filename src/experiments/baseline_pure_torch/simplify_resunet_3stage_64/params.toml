@@ -1,0 +1,31 @@
+[device]
+CUDA_VISIBLE_DEVICES = "1"
+
+[dataset]
+name = "WFM"
+train_images_dir = "/media/data3/sj/Data/nnUNet/nnUNet_raw/Dataset050_DSA/imagesTr"
+train_labels_dir = "/media/data3/sj/Data/nnUNet/nnUNet_raw/Dataset050_DSA/labelsTr"
+test_images_dir = "/media/data3/sj/Data/nnUNet/nnUNet_raw/Dataset050_DSA/imagesTs"
+test_labels_dir = "/media/data3/sj/Data/nnUNet/nnUNet_raw/Dataset050_DSA/labelsTs"
+
+[model]
+name = "ResEncUNet"
+other_info = "pure_torch"
+channels = [8, 16, 32, 64]
+n_basic_blocks = [2, 3, 4]
+
+[train]
+batch_size = 20
+shuffle = true
+n_epochs = 100
+saving_interval = 20
+
+[valid]
+batch_size = 20
+shuffle = false
+valid_interval = 1
+
+[test]
+batch_size = 1
+shuffle = false
+max_saved_image = 0

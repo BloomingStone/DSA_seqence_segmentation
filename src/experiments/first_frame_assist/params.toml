@@ -1,5 +1,5 @@
 [device]
-CUDA_VISIBLE_DEVICES = "1"
+CUDA_VISIBLE_DEVICES = "0"
 
 [dataset]
 name = "WFM"
@@ -24,6 +24,7 @@ saving_interval = 20
 [valid]
 batch_size = 4
 shuffle = false
+valid_step = 5
 
 [test]
 batch_size = 1
