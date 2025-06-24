@@ -1,4 +1,5 @@
-device = "3"
+[device]
+CUDA_VISIBLE_DEVICES = "3"
 
 [dataset]
 name = "WFM"
